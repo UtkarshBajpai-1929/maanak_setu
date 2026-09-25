@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      length: 10
     },
 
     password: {
@@ -40,21 +41,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      length: 12
     },
 
     pin_code: {
       type: String,
       trim: true,
+      length: 6
     },
-
-    address: {
-      street: String,
-      city: String,
-      district: String,
-      state: String,
-      pincode: String,
-    },
-
     isActive: {
       type: Boolean,
       default: true,

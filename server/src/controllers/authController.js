@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import ApiError from "../utils/apiError.js";
 import { sendSuccess } from "../utils/apiResponse.js";
-import { validateEmail, validatePhone } from "../middleware/validateMiddleware.js";
+import { validateAdhar, validateEmail, validatePhone, validatePin } from "../middleware/validateMiddleware.js";
 
 const generateToken = (user) => {
   const secret = process.env.JWT_SECRET || "maanak_setu_jwt_super_secret_key_2026";
@@ -46,6 +46,12 @@ export const register = async (req, res, next) => {
 
     if (!validatePhone(phone)) {
       throw new ApiError(400, "Please provide a valid phone number");
+    }
+     if (!validateAdhar(aadhar_no)) {
+      throw new ApiError(400, "Please provide a valid aadhar number");
+    }
+     if (!validatePin(pin_code)) {
+      throw new ApiError(400, "Please provide a valid PIN code");
     }
 
     if (password.length < 8) {

@@ -17,6 +17,14 @@ export const validateEmail = (email) => {
 };
 
 export const validatePhone = (phone) => {
-  const re = /^[0-9+-\s()]{7,15}$/;
+  const re = /^[0-9+-\s()]{10}$/;
   return re.test(String(phone));
+};
+export const validateAdhar = (adhar) => {
+  const re = /^[0-9+-\s()]{12}$/;
+  return re.test(String(adhar));
+};
+export const validatePin = (pin) => {
+  const re = /^[0-9+-\s()]{6}$/;
+  return re.test(String(pin));
 };
