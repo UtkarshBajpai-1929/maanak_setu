@@ -7,7 +7,7 @@ import { safeJsonParse } from "../utils/urlHelper.js";
 
 export const createShop = async (req, res, next) => {
   try {
-    const { shopName, licenseNumber } = req.body;
+    const { shopName, gstNumber } = req.body;
     const address = safeJsonParse(req.body.address);
     const operational_time = safeJsonParse(req.body.operational_time);
 
@@ -15,8 +15,8 @@ export const createShop = async (req, res, next) => {
       throw new ApiError(400, "Shop name is required");
     }
 
-    if (licenseNumber) {
-      const existingLicense = await Shop.findOne({ licenseNumber });
+    if (gstNumber) {
+      const existingLicense = await Shop.findOne({ gstNumber });
       if (existingLicense) {
         throw new ApiError(409, "Shop with this license number already exists");
       }
@@ -25,7 +25,7 @@ export const createShop = async (req, res, next) => {
     const shop = await Shop.create({
       owner: req.user._id,
       shopName,
-      licenseNumber: licenseNumber || undefined,
+      gstNumber: gstNumber || undefined,
       address,
       operational_time,
     });
@@ -184,7 +184,7 @@ export const getOfficerShops = async (req, res, next) => {
     }
 
     const shops = await Shop.find({
-      "address.pincode": officer.pin_code,
+      "pincode": officer.pin_code,
       isActive: true,
     })
       .populate({

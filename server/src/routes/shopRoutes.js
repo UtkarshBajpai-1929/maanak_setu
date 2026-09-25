@@ -5,6 +5,7 @@ import {
   getShopById,
   updateShop,
   deleteShop,
+  getOfficerShops,
 } from "../controllers/shopController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { validateObjectId } from "../middleware/validateMiddleware.js";

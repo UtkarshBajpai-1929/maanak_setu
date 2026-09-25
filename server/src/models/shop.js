@@ -13,7 +13,7 @@ const shopSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    licenseNumber: {
+    gstNumber: {
       type: String,
       trim: true,
       unique: true,
@@ -21,13 +21,14 @@ const shopSchema = new mongoose.Schema(
     },
 
     address: {
-      street: String,
-      city: String,
-      district: String,
-      state: String,
-      pincode: String,
+      type: String,
+      required: true
     },
-
+    pincode: {
+      type: String,
+      length: 6,
+      required: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

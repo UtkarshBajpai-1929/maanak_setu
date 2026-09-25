@@ -121,7 +121,7 @@ export const generateCertificatePdf = async ({
       const shopName = shop?.shopName || "N/A";
       const shopLicense = shop?.licenseNumber || "N/A";
       const shopAddr = shop?.address
-        ? `${shop.address.street || ""}, ${shop.address.city || ""}, ${shop.address.district || ""}, ${shop.address.state || ""} - ${shop.address.pincode || ""}`
+        ? `${shop.address}`
         : "N/A";
 
       doc.text(`Name of Shop / Establishment: ${shopName}`, 50);
