@@ -6,10 +6,10 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import { safeJsonParse } from "../utils/urlHelper.js";
 
 export const createShop = async (req, res, next) => {
+  
   try {
-    const { shopName, gstNumber } = req.body;
-    const address = safeJsonParse(req.body.address);
-    const operational_time = safeJsonParse(req.body.operational_time);
+    const { shopName, gstNumber, opening, closing, address, pincode} = req.body;
+    const operational_time = {opening: opening, closing: closing };
 
     if (!shopName) {
       throw new ApiError(400, "Shop name is required");
@@ -23,15 +23,17 @@ export const createShop = async (req, res, next) => {
     }
 
     const shop = await Shop.create({
+      pincode,
       owner: req.user._id,
       shopName,
       gstNumber: gstNumber || undefined,
       address,
       operational_time,
     });
-
+    console.log(shop);
     return sendSuccess(res, 201, "Shop created successfully", shop);
   } catch (error) {
+    console.log(error.message)
     next(error);
   }
 };
@@ -169,6 +171,9 @@ export const deleteShop = async (req, res, next) => {
 
 export const getOfficerShops = async (req, res, next) => {
   try {
+    if(!req.user){
+      throw new ApiError(401, "Umauthorised request")
+    }
     if (req.user.role !== "OFFICER") {
       throw new ApiError(403, "Only officers can access this resource");
     }
