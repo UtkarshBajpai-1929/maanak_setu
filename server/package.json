@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "node tests/e2e.test.js"
+    "test": "node tests/e2e.test.js",
+    "test:email": "node tests/emailService.test.js"
   },
   "keywords": [],
   "author": "",
