@@ -1,3 +1,4 @@
+import User from "../models/user.js";
 import Shop from "../models/shop.js";
 import ApiError from "../utils/apiError.js";
 import { sendSuccess } from "../utils/apiResponse.js";
@@ -6,7 +7,7 @@ import { safeJsonParse } from "../utils/urlHelper.js";
 
 export const createShop = async (req, res, next) => {
   try {
-    const { shopName, licenseNumber } = req.body;
+    const { shopName, gstNumber } = req.body;
     const address = safeJsonParse(req.body.address);
     const operational_time = safeJsonParse(req.body.operational_time);
 
@@ -14,8 +15,8 @@ export const createShop = async (req, res, next) => {
       throw new ApiError(400, "Shop name is required");
     }
 
-    if (licenseNumber) {
-      const existingLicense = await Shop.findOne({ licenseNumber });
+    if (gstNumber) {
+      const existingLicense = await Shop.findOne({ gstNumber });
       if (existingLicense) {
         throw new ApiError(409, "Shop with this license number already exists");
       }
@@ -24,7 +25,7 @@ export const createShop = async (req, res, next) => {
     const shop = await Shop.create({
       owner: req.user._id,
       shopName,
-      licenseNumber: licenseNumber || undefined,
+      gstNumber: gstNumber || undefined,
       address,
       operational_time,
     });
@@ -161,6 +162,43 @@ export const deleteShop = async (req, res, next) => {
     await shop.save();
 
     return sendSuccess(res, 200, "Shop deactivated successfully", shop);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOfficerShops = async (req, res, next) => {
+  try {
+    if (req.user.role !== "OFFICER") {
+      throw new ApiError(403, "Only officers can access this resource");
+    }
+
+    const officer = await User.findById(req.user._id).select("pin_code");
+
+    if (!officer) {
+      throw new ApiError(404, "Officer not found");
+    }
+
+    if (!officer.pin_code) {
+      throw new ApiError(400, "Pincode is not assigned to this officer");
+    }
+
+    const shops = await Shop.find({
+      "pincode": officer.pin_code,
+      isActive: true,
+    })
+      .populate({
+        path: "owner",
+        select: "name email phone",
+      })
+      .sort({ createdAt: -1 });
+
+    return sendSuccess(
+      res,
+      200,
+      "Shops retrieved successfully",
+      shops
+    );
   } catch (error) {
     next(error);
   }

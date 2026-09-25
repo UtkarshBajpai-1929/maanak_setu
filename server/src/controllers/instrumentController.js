@@ -1,5 +1,6 @@
 import Instrument from "../models/instrument.js";
 import Shop from "../models/shop.js";
+import User from "../models/user.js";
 import ApiError from "../utils/apiError.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { processUploadedFile } from "../middleware/uploadMiddleware.js";
@@ -300,6 +301,56 @@ export const deleteInstrument = async (req, res, next) => {
     await Instrument.findByIdAndDelete(req.params.id);
 
     return sendSuccess(res, 200, "Instrument deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getInstrumentsByShop = async (req, res, next) => {
+  try {
+    const { shopId } = req.params;
+
+    const shop = await Shop.findById(shopId);
+
+    if (!shop) {
+      throw new ApiError(404, "Shop not found");
+    }
+
+    // Officer can only access shops in their PIN area
+    if (req.user.role === "OFFICER") {
+      const officer = await User.findById(req.user._id).select("pin_code");
+
+      if (!officer) {
+        throw new ApiError(404, "Officer not found");
+      }
+
+      if (officer.pin_code !== shop.address?.pincode) {
+        throw new ApiError(
+          403,
+          "You do not have permission to view instruments of this shop"
+        );
+      }
+    }
+
+    const instruments = await Instrument.find({
+      shop: shopId,
+    })
+      .populate({
+        path: "shop",
+        select: "shopName licenseNumber address owner",
+        populate: {
+          path: "owner",
+          select: "name email phone",
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    return sendSuccess(
+      res,
+      200,
+      "Shop instruments retrieved successfully",
+      instruments
+    );
   } catch (error) {
     next(error);
   }

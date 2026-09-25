@@ -5,6 +5,7 @@ import {
   getShopById,
   updateShop,
   deleteShop,
+  getOfficerShops,
 } from "../controllers/shopController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { validateObjectId } from "../middleware/validateMiddleware.js";
@@ -18,5 +19,6 @@ router.get("/", getShops);
 router.get("/:id", validateObjectId("id"), getShopById);
 router.patch("/:id", validateObjectId("id"), updateShop);
 router.delete("/:id", validateObjectId("id"), deleteShop);
+router.get("/officer", getOfficerShops);
 
 export default router;
