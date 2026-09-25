@@ -4,7 +4,6 @@ import {
   getApplications,
   getApplicationById,
   updateApplication,
-  assignApplication,
   updateApplicationStatus,
   submitVerificationResult,
   rejectApplication,
@@ -24,12 +23,6 @@ router.get("/:id", validateObjectId("id"), getApplicationById);
 router.patch("/:id", validateObjectId("id"), upload.single("document"), updateApplication);
 
 // Officer workflow endpoints
-router.patch(
-  "/:id/assign",
-  validateObjectId("id"),
-  authorizeRoles("OFFICER"),
-  assignApplication
-);
 
 router.patch(
   "/:id/status",

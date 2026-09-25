@@ -8,11 +8,15 @@ import { calculateCertificateDates } from "./validityService.js";
 import { buildVerificationUrl, generateQrDataUrl } from "./qrService.js";
 import { generateCertificatePdf } from "./pdfService.js";
 import { createNotification } from "./notificationService.js";
+import { sendVerificationSuccessEmail } from "./emailService.js";
 
 export const issueCertificateForApplication = async (applicationId, officerUser) => {
   const application = await Application.findById(applicationId)
     .populate("applicant", "name email phone")
-    .populate("shop")
+    .populate({
+      path: "shop",
+      populate: { path: "owner", select: "name email phone" },
+    })
     .populate("instrument")
     .populate("assignedOfficer", "name email phone role");
 
@@ -111,6 +115,19 @@ export const issueCertificateForApplication = async (applicationId, officerUser)
     title: "Verification Certificate Issued",
     message: `Digital Verification Certificate ${certificate.certificateNumber} has been issued for instrument ${application.instrument.serialNumber}.`,
   });
+
+  // Automatically send email with verification certificate attachment (isolated error boundary)
+  try {
+    await sendVerificationSuccessEmail({
+      application,
+      certificate,
+      instrument: application.instrument,
+      shop: application.shop,
+      officer: officerUser || application.assignedOfficer,
+    });
+  } catch (emailErr) {
+    console.error("[CertificateService] Verification email failed:", emailErr.message);
+  }
 
   return certificate;
 };

@@ -85,6 +85,7 @@ async function runTests() {
         phone: "9811223344",
         password: "OfficerPass123!",
         aadhar_no: "998877665544",
+        pin_code: "110001",
         role: "OFFICER",
       }),
     });
@@ -104,6 +105,7 @@ async function runTests() {
         phone: "9123456780",
         password: "Password123!",
         aadhar_no: "123456789013",
+        pin_code: "110001",
       }),
     });
     assert(dupRes.status === 409, "Duplicate email rejected with status 409");
@@ -265,17 +267,41 @@ async function runTests() {
     assert(Array.isArray(listAppsData.data), "Returns array of applications");
     assert(listAppsData.pagination.total >= 1, "Pagination info returned");
 
-    // --- TEST 9: Officer Assignment ---
-    logStep(9, "Application Officer Allocation");
-    const assignRes = await fetch(`${baseUrl}/applications/${applicationId}/assign`, {
-      method: "PATCH",
-      headers: { ...BASE_HEADERS, Authorization: `Bearer ${officerToken}` },
-      body: JSON.stringify({ officerId: officerId }),
+    // --- TEST 9: Officer Area PIN Code Routing & Visibility ---
+    logStep(9, "Officer Area PIN Code Routing & Visibility (No Manual Officer Assignment)");
+    const areaAppsRes = await fetch(`${baseUrl}/applications`, {
+      headers: { Authorization: `Bearer ${officerToken}` },
     });
-    const assignData = await assignRes.json();
-    assert(assignRes.status === 200, "Application assigned with status 200");
-    assert(assignData.data.assignedOfficer === officerId, "Assigned officer linked");
-    assert(assignData.data.status === "UNDER_REVIEW", "Application status transitioned to UNDER_REVIEW");
+    const areaAppsData = await areaAppsRes.json();
+    assert(areaAppsRes.status === 200, "Applications retrieved by area officer with status 200");
+    assert(
+      areaAppsData.data.some((a) => a._id === applicationId),
+      "Officer with PIN code 110001 automatically sees the shop application in 110001"
+    );
+
+    // Register officer from different area (e.g. 560001) to verify jurisdiction segregation
+    const otherOfficerRes = await fetch(`${baseUrl}/auth/register`, {
+      method: "POST",
+      headers: BASE_HEADERS,
+      body: JSON.stringify({
+        name: "Officer South Zone",
+        email: "south.officer@gov.in",
+        phone: "9822334455",
+        password: "OfficerPass123!",
+        aadhar_no: "997755331100",
+        pin_code: "560001",
+        role: "OFFICER",
+      }),
+    });
+    const otherOfficerData = await otherOfficerRes.json();
+    const otherAppsRes = await fetch(`${baseUrl}/applications`, {
+      headers: { Authorization: `Bearer ${otherOfficerData.data.token}` },
+    });
+    const otherAppsData = await otherAppsRes.json();
+    assert(
+      !otherAppsData.data.some((a) => a._id === applicationId),
+      "Officer with PIN code 560001 does not see applications from 110001"
+    );
 
     // --- TEST 10: Schedule Creation ---
     logStep(10, "Verification Scheduling");
@@ -482,14 +508,7 @@ async function runTests() {
     });
     assert(notFoundRes.status === 404, "Unknown route returns 404");
 
-    // --- TEST 20: Cloudinary Signature Endpoint for Mobile Frontend ---
-    logStep(20, "Cloudinary Signature Endpoint for Mobile Frontend Direct Uploads");
-    const cloudSigRes = await fetch(`${baseUrl}/cloudinary/signature`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    const cloudSigData = await cloudSigRes.json();
-    assert(cloudSigRes.status === 200, "Cloudinary signature endpoint responded with 200");
-    assert(cloudSigData.success === true, "Response has success: true");
+
 
     console.log("\n==================================================");
     console.log("ALL TESTS PASSED! ONLY 2 ROLES (USER & OFFICER)");

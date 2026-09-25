@@ -164,11 +164,14 @@ export const getApplications = async (req, res, next) => {
     if (req.user.role === "USER") {
       query.applicant = req.user._id;
     } else if (req.user.role === "OFFICER") {
-      // Officers see either their assigned applications, or unassigned applications under review
-      if (req.query.assignedOnly === "true") {
-        query.assignedOfficer = req.user._id;
-      } else {
-        query.$or = [{ assignedOfficer: req.user._id }, { assignedOfficer: null }];
+      // Officers view all applications in their assigned PIN code area
+      const officerPincode = req.query.pincode || req.user.pin_code;
+      if (officerPincode) {
+        const shopsInArea = await Shop.find({
+          "address.pincode": String(officerPincode).trim(),
+        }).select("_id");
+        const shopIds = shopsInArea.map((s) => s._id);
+        query.shop = { $in: shopIds };
       }
     }
 
@@ -313,60 +316,7 @@ export const updateApplication = async (req, res, next) => {
   }
 };
 
-export const assignApplication = async (req, res, next) => {
-  try {
-    const { officerId } = req.body;
 
-    if (!officerId) {
-      throw new ApiError(400, "Officer ID is required for allocation");
-    }
-
-    const officer = await User.findById(officerId);
-    if (!officer) {
-      throw new ApiError(404, "Officer not found");
-    }
-
-    if (officer.role !== "OFFICER") {
-      throw new ApiError(400, `Assigned user must have role OFFICER, but has '${officer.role}'`);
-    }
-
-    const application = await Application.findById(req.params.id);
-    if (!application) {
-      throw new ApiError(404, "Application not found");
-    }
-
-    application.assignedOfficer = officer._id;
-    application.assignedAt = new Date();
-
-    if (application.status === "SUBMITTED") {
-      application.status = "UNDER_REVIEW";
-    }
-
-    await application.save();
-
-    // Notify assigned officer
-    await createNotification({
-      user: officer._id,
-      application: application._id,
-      type: "APPLICATION_UPDATE",
-      title: "New Application Assigned",
-      message: `Application ${application.applicationNumber} has been assigned to you for verification.`,
-    });
-
-    // Notify applicant
-    await createNotification({
-      user: application.applicant,
-      application: application._id,
-      type: "APPLICATION_UPDATE",
-      title: "Officer Assigned",
-      message: `Officer ${officer.name} (${officer.role}) has been assigned to review your application ${application.applicationNumber}.`,
-    });
-
-    return sendSuccess(res, 200, "Application assigned successfully", application);
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const updateApplicationStatus = async (req, res, next) => {
   try {
@@ -423,19 +373,23 @@ export const submitVerificationResult = async (req, res, next) => {
 
     const application = await Application.findById(req.params.id)
       .populate("instrument")
-      .populate("applicant");
+      .populate("applicant")
+      .populate("shop");
 
     if (!application) {
       throw new ApiError(404, "Application not found");
     }
 
-    // Role check: Only assigned officer
+    // Jurisdiction check: Ensure officer has jurisdiction over the shop's area PIN code
     if (
-      application.assignedOfficer &&
-      application.assignedOfficer.toString() !== req.user._id.toString()
+      req.user.pin_code &&
+      application.shop?.address?.pincode &&
+      String(application.shop.address.pincode).trim() !== String(req.user.pin_code).trim()
     ) {
-      throw new ApiError(403, "Only the assigned verification officer can record verification results");
+      throw new ApiError(403, "You do not have jurisdiction to record verification in this area PIN code");
     }
+
+    application.assignedOfficer = req.user._id;
 
     // Process file upload and safely parse mobile FormData fields
     const parsedTestReadings = Array.isArray(testReadings)
