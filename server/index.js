@@ -15,7 +15,6 @@ import applicationRoutes from "./src/routes/applicationRoutes.js";
 import scheduleRoutes from "./src/routes/scheduleRoutes.js";
 import certificateRoutes from "./src/routes/certificateRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
-import cloudinaryRoutes from "./src/routes/cloudinaryRoutes.js";
 
 import { notFoundHandler, errorHandler } from "./src/middleware/errorMiddleware.js";
 
@@ -83,7 +82,6 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/certificates", certificateRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/cloudinary", cloudinaryRoutes);
 
 // Centralized error handling
 app.use(notFoundHandler);
