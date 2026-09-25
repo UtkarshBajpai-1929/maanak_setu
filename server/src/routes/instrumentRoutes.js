@@ -5,6 +5,7 @@ import {
   getInstrumentById,
   updateInstrument,
   deleteInstrument,
+  getInstrumentsByShop,
 } from "../controllers/instrumentController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { validateObjectId } from "../middleware/validateMiddleware.js";
@@ -19,5 +20,5 @@ router.get("/", getInstruments);
 router.get("/:id", validateObjectId("id"), getInstrumentById);
 router.patch("/:id", validateObjectId("id"), upload.single("document"), updateInstrument);
 router.delete("/:id", validateObjectId("id"), deleteInstrument);
-
+router.get("/shop/:shopId", validateObjectId("shopId"), getInstrumentsByShop);
 export default router;

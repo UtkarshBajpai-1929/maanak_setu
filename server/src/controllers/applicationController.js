@@ -313,60 +313,60 @@ export const updateApplication = async (req, res, next) => {
   }
 };
 
-export const assignApplication = async (req, res, next) => {
-  try {
-    const { officerId } = req.body;
+// export const assignApplication = async (req, res, next) => {
+//   try {
+//     const { officerId } = req.body;
 
-    if (!officerId) {
-      throw new ApiError(400, "Officer ID is required for allocation");
-    }
+//     if (!officerId) {
+//       throw new ApiError(400, "Officer ID is required for allocation");
+//     }
 
-    const officer = await User.findById(officerId);
-    if (!officer) {
-      throw new ApiError(404, "Officer not found");
-    }
+//     const officer = await User.findById(officerId);
+//     if (!officer) {
+//       throw new ApiError(404, "Officer not found");
+//     }
 
-    if (officer.role !== "OFFICER") {
-      throw new ApiError(400, `Assigned user must have role OFFICER, but has '${officer.role}'`);
-    }
+//     if (officer.role !== "OFFICER") {
+//       throw new ApiError(400, `Assigned user must have role OFFICER, but has '${officer.role}'`);
+//     }
 
-    const application = await Application.findById(req.params.id);
-    if (!application) {
-      throw new ApiError(404, "Application not found");
-    }
+//     const application = await Application.findById(req.params.id);
+//     if (!application) {
+//       throw new ApiError(404, "Application not found");
+//     }
 
-    application.assignedOfficer = officer._id;
-    application.assignedAt = new Date();
+//     application.assignedOfficer = officer._id;
+//     application.assignedAt = new Date();
 
-    if (application.status === "SUBMITTED") {
-      application.status = "UNDER_REVIEW";
-    }
+//     if (application.status === "SUBMITTED") {
+//       application.status = "UNDER_REVIEW";
+//     }
 
-    await application.save();
+//     await application.save();
 
-    // Notify assigned officer
-    await createNotification({
-      user: officer._id,
-      application: application._id,
-      type: "APPLICATION_UPDATE",
-      title: "New Application Assigned",
-      message: `Application ${application.applicationNumber} has been assigned to you for verification.`,
-    });
+//     // Notify assigned officer
+//     await createNotification({
+//       user: officer._id,
+//       application: application._id,
+//       type: "APPLICATION_UPDATE",
+//       title: "New Application Assigned",
+//       message: `Application ${application.applicationNumber} has been assigned to you for verification.`,
+//     });
 
-    // Notify applicant
-    await createNotification({
-      user: application.applicant,
-      application: application._id,
-      type: "APPLICATION_UPDATE",
-      title: "Officer Assigned",
-      message: `Officer ${officer.name} (${officer.role}) has been assigned to review your application ${application.applicationNumber}.`,
-    });
+//     // Notify applicant
+//     await createNotification({
+//       user: application.applicant,
+//       application: application._id,
+//       type: "APPLICATION_UPDATE",
+//       title: "Officer Assigned",
+//       message: `Officer ${officer.name} (${officer.role}) has been assigned to review your application ${application.applicationNumber}.`,
+//     });
 
-    return sendSuccess(res, 200, "Application assigned successfully", application);
-  } catch (error) {
-    next(error);
-  }
-};
+//     return sendSuccess(res, 200, "Application assigned successfully", application);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const updateApplicationStatus = async (req, res, next) => {
   try {

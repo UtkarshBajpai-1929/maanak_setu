@@ -18,5 +18,6 @@ router.get("/", getShops);
 router.get("/:id", validateObjectId("id"), getShopById);
 router.patch("/:id", validateObjectId("id"), updateShop);
 router.delete("/:id", validateObjectId("id"), deleteShop);
+router.get("/officer", getOfficerShops);
 
 export default router;

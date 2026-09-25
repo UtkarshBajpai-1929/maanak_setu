@@ -1,3 +1,4 @@
+import User from "../models/user.js";
 import Shop from "../models/shop.js";
 import ApiError from "../utils/apiError.js";
 import { sendSuccess } from "../utils/apiResponse.js";
@@ -161,6 +162,43 @@ export const deleteShop = async (req, res, next) => {
     await shop.save();
 
     return sendSuccess(res, 200, "Shop deactivated successfully", shop);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOfficerShops = async (req, res, next) => {
+  try {
+    if (req.user.role !== "OFFICER") {
+      throw new ApiError(403, "Only officers can access this resource");
+    }
+
+    const officer = await User.findById(req.user._id).select("pin_code");
+
+    if (!officer) {
+      throw new ApiError(404, "Officer not found");
+    }
+
+    if (!officer.pin_code) {
+      throw new ApiError(400, "Pincode is not assigned to this officer");
+    }
+
+    const shops = await Shop.find({
+      "address.pincode": officer.pin_code,
+      isActive: true,
+    })
+      .populate({
+        path: "owner",
+        select: "name email phone",
+      })
+      .sort({ createdAt: -1 });
+
+    return sendSuccess(
+      res,
+      200,
+      "Shops retrieved successfully",
+      shops
+    );
   } catch (error) {
     next(error);
   }
