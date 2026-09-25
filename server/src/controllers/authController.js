@@ -50,7 +50,7 @@ export const register = async (req, res, next) => {
      if (!validateAdhar(aadhar_no)) {
       throw new ApiError(400, "Please provide a valid aadhar number");
     }
-     if (!validatePin(pin_code)) {
+     if (pin_code && !validatePin(pin_code)) {
       throw new ApiError(400, "Please provide a valid PIN code");
     }
 
