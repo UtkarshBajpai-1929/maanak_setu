@@ -1,0 +1,388 @@
+{
+  "info": {
+    "name": "MaanakSetu - Online Verification System API",
+    "_postman_id": "maanaksetu-sih-26036-api-collection",
+    "description": "Smart India Hackathon Problem Statement 26036: Development of an Online Verification System for Weighing and Measuring Instruments (MaanakSetu). Two Roles: USER and OFFICER.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "officerToken", "value": "", "type": "string" },
+    { "key": "shopId", "value": "", "type": "string" },
+    { "key": "instrumentId", "value": "", "type": "string" },
+    { "key": "applicationId", "value": "", "type": "string" },
+    { "key": "certificateId", "value": "", "type": "string" },
+    { "key": "certificateNumber", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Kumar\",\n  \"email\": \"ramesh.kumar@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Password123!\",\n  \"aadhar_no\": \"123456789012\",\n  \"pin_code\": \"110001\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Register Officer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Officer Vikram Singh\",\n  \"email\": \"vikram.singh@gov.in\",\n  \"phone\": \"9811223344\",\n  \"password\": \"OfficerPass123!\",\n  \"aadhar_no\": \"998877665544\",\n  \"role\": \"OFFICER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ramesh.kumar@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Users",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Kumar Gupta\",\n  \"phone\": \"9876543219\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Shops",
+      "item": [
+        {
+          "name": "Create Shop",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopName\": \"Ramesh Kirana & Provisions\",\n  \"licenseNumber\": \"LIC-DEL-2026-9001\",\n  \"address\": {\n    \"street\": \"Shop 12, Main Bazaar\",\n    \"city\": \"New Delhi\",\n    \"district\": \"Central Delhi\",\n    \"state\": \"Delhi\",\n    \"pincode\": \"110001\"\n  },\n  \"operational_time\": {\n    \"opening\": \"08:00 AM\",\n    \"closing\": \"09:00 PM\"\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/shops", "host": ["{{baseUrl}}"], "path": ["shops"] }
+          }
+        },
+        {
+          "name": "Get Shops",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/shops?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["shops"] }
+          }
+        },
+        {
+          "name": "Get Shop By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/shops/{{shopId}}", "host": ["{{baseUrl}}"], "path": ["shops", "{{shopId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Instruments",
+      "item": [
+        {
+          "name": "Register Instrument",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop\": \"{{shopId}}\",\n  \"category\": \"WEIGHING_SCALE\",\n  \"serialNumber\": \"SN-WS-2026-1001\",\n  \"capacity\": \"30 kg\",\n  \"installationType\": \"MOVABLE\",\n  \"modelApprovalCertificateNumber\": \"IND/09/2023/123\",\n  \"purchaseDate\": \"2024-01-15\",\n  \"documentUrl\": \"https://res.cloudinary.com/demo/image/upload/v1234567890/maanaksetu/instruments/scale_invoice.pdf\",\n  \"documentType\": \"INVOICE\",\n  \"documentName\": \"scale_invoice.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/instruments", "host": ["{{baseUrl}}"], "path": ["instruments"] }
+          }
+        },
+        {
+          "name": "Get Instruments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/instruments?category=WEIGHING_SCALE&page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["instruments"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Applications",
+      "item": [
+        {
+          "name": "Submit Fresh Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop\": \"{{shopId}}\",\n  \"instrument\": \"{{instrumentId}}\",\n  \"applicationType\": \"FRESH\",\n  \"remarks\": \"Initial verification of newly acquired counter scale\",\n  \"documentUrl\": \"https://res.cloudinary.com/demo/image/upload/v1234567890/maanaksetu/applications/verification_challan.pdf\",\n  \"documentType\": \"OTHER\",\n  \"documentName\": \"verification_challan.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications", "host": ["{{baseUrl}}"], "path": ["applications"] }
+          }
+        },
+        {
+          "name": "Submit Re-verification Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop\": \"{{shopId}}\",\n  \"instrument\": \"{{instrumentId}}\",\n  \"applicationType\": \"RE_VERIFICATION\",\n  \"reason\": \"ROUTINE_EXPIRY\",\n  \"previousCertificate\": \"{{certificateId}}\",\n  \"remarks\": \"Routine biennial re-verification\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications", "host": ["{{baseUrl}}"], "path": ["applications"] }
+          }
+        },
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/applications?status=SUBMITTED&page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["applications"] }
+          }
+        },
+        {
+          "name": "Assign Officer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{officerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"officerId\": \"<OFFICER_USER_ID>\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/{{applicationId}}/assign", "host": ["{{baseUrl}}"], "path": ["applications", "{{applicationId}}", "assign"] }
+          }
+        },
+        {
+          "name": "Submit Verification (Pass)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{officerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"PASS\",\n  \"instrumentCondition\": \"GOOD\",\n  \"testReadings\": [\n    { \"parameter\": \"Repeatability test 5kg\", \"standardValue\": \"5.000 kg\", \"observedValue\": \"5.001 kg\", \"error\": \"+1g\", \"pass\": true }\n  ],\n  \"stampCode\": \"LM-DEL-26-101\",\n  \"remarks\": \"Instrument verified and certified under Legal Metrology Act, 2009\",\n  \"photographs\": [\n    \"https://res.cloudinary.com/demo/image/upload/v1234567890/maanaksetu/verification/field_inspection.jpg\"\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/{{applicationId}}/verify", "host": ["{{baseUrl}}"], "path": ["applications", "{{applicationId}}", "verify"] }
+          }
+        },
+        {
+          "name": "Reject Application",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{officerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"FAIL\",\n  \"rejectionReason\": \"Instrument reading outside permissible tolerance limits\",\n  \"defectPhotographs\": [\n    \"https://res.cloudinary.com/demo/image/upload/v1234567890/maanaksetu/verification/defect_seal.jpg\"\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/{{applicationId}}/reject", "host": ["{{baseUrl}}"], "path": ["applications", "{{applicationId}}", "reject"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Schedules",
+      "item": [
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{officerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application\": \"{{applicationId}}\",\n  \"scheduledDate\": \"2026-10-05T10:00:00.000Z\",\n  \"verificationType\": \"FIELD\",\n  \"remarks\": \"Field inspection scheduled at establishment premises\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/schedules", "host": ["{{baseUrl}}"], "path": ["schedules"] }
+          }
+        },
+        {
+          "name": "List Schedules",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/schedules?status=SCHEDULED&page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["schedules"] }
+          }
+        },
+        {
+          "name": "Reschedule Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{officerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledDate\": \"2026-10-07T11:30:00.000Z\",\n  \"rescheduleReason\": \"Applicant requested date adjustment\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/schedules/{{scheduleId}}/reschedule", "host": ["{{baseUrl}}"], "path": ["schedules", "{{scheduleId}}", "reschedule"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Certificates",
+      "item": [
+        {
+          "name": "List Certificates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/certificates?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["certificates"] }
+          }
+        },
+        {
+          "name": "Get Certificate By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/certificates/{{certificateId}}", "host": ["{{baseUrl}}"], "path": ["certificates", "{{certificateId}}"] }
+          }
+        },
+        {
+          "name": "Download Certificate PDF",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/certificates/{{certificateId}}/download", "host": ["{{baseUrl}}"], "path": ["certificates", "{{certificateId}}", "download"] }
+          }
+        },
+        {
+          "name": "Public QR Certificate Verification (No Auth)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/certificates/verify/{{certificateNumber}}", "host": ["{{baseUrl}}"], "path": ["certificates", "verify", "{{certificateNumber}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/notifications?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["notifications"] }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/notifications/unread", "host": ["{{baseUrl}}"], "path": ["notifications", "unread"] }
+          }
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["notifications", "read-all"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Cloudinary (Direct Upload)",
+      "item": [
+        {
+          "name": "Get Upload Signature",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/cloudinary/signature?folder=maanaksetu/instruments",
+              "host": ["{{baseUrl}}"],
+              "path": ["cloudinary", "signature"],
+              "query": [
+                {
+                  "key": "folder",
+                  "value": "maanaksetu/instruments",
+                  "description": "Destination Cloudinary folder for direct mobile upload"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
